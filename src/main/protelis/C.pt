@@ -1,0 +1,62 @@
+module C
+
+import java.lang.Double.* 
+
+public def foldHood (callback, field, default) {	
+	hood ((a, b) -> { callback.apply(a, b) }, default, field)
+}
+
+public def countHood (cond) { 	
+	sumHood (mux(cond) { 1 } else { 0 })
+}
+
+///////////////////////////////////////////////////// STANDARD C
+
+public def C_STD (potential, accumulate, local, null) {
+	
+	let id = self.getDeviceUID().getId();
+	
+	rep (x <- [local, id]) {
+		
+		let valueF = mux (nbr(x.get(1)) == id && 
+			nbr(potential) < potential) { nbr(x.get(0)) } 
+		else { null };
+		
+		let nbrLocal = foldHood (accumulate, valueF, null);
+		
+		[accumulate.apply (local, nbrLocal), 
+		 maxHood PlusSelf (nbr([potential, id])).get(1)]
+	}
+	.get(0)
+}
+
+///////////////////////////////////////////////////// MULTIPATH C
+//
+// @pre Nella funzione extract il valore di num può essere uguale 
+//		a 0, quindi la funzione root in input deve tenere conto di 
+// 		questa possibilità per evitare che la radice calcolata sia 
+// 		uguale a NaN.
+//
+//////////////////////////////////////////////////////////////////
+
+def extract (val, num, root) { [val,root.apply(val, num)] }
+
+def aggregate (field, potential, accumulate, local, null, root) {
+	
+	let nbrRoots = foldHood (accumulate, field, null);
+	
+	extract (accumulate.apply (local, nbrRoots),
+		countHood (nbr(potential) > potential), root)
+}
+
+public def C_Multipath (potential, accumulate, local, null, root) {
+	
+	rep (x <- [local, local]) {
+		
+		aggregate (mux(nbr(!isInfinite(potential)) &&
+			           nbr(potential) < potential) 
+			      { nbr(x.get(1)) } else { null },
+			potential, accumulate, local, null, root)
+	}.get(0)
+}
+

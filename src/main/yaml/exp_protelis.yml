@@ -1,0 +1,51 @@
+variables:
+  random: &random
+    min: 0
+    max: 5
+    step: 1
+    default: 0
+  commRadius: &commRadius
+    min: 1.6
+    max: 2.7
+    step: 1
+    default: 2.0
+          
+export:
+  - time
+  - molecule: it.unibo.exp
+    aggregators: [mean]
+    value-filter: ONLYFINITE
+
+seeds:
+  scenario: *random
+  simulation: *random
+
+network-model:
+  type: EuclideanDistance
+  parameters: [*commRadius]
+  
+incarnation: protelis
+
+pools:
+  - pool: &program
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: RunProtelisProgram
+          parameters: [exp_protelis, 20]
+  - pool: &contents
+    - molecule: source
+      concentration: 0 # false
+    - molecule: commRadius
+      concentration: *commRadius
+
+positions:
+  type: Continuous2DEuclidean
+  
+displacements:
+  - in:
+      type: Grid 
+      parameters: [0, 0, 30, 30, 2, 2, 0.2, 0.2]
+    programs: 
+      - *program
+    contents: *contents

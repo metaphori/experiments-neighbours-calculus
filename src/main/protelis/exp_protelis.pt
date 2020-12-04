@@ -1,0 +1,36 @@
+module exp_protelis
+
+import java.lang.Math.*
+
+public def nbrRange() {
+	self.nbrRange()
+}
+
+def distanceTo(source) {
+  rep(d <- Infinity) {
+    mux (source) { 
+    	0
+    }
+    else { 
+    	minHood(nbr(d) + nbrRange())
+    }
+  }
+}
+
+public def findParent(potential) {
+  mux(minHood(nbr(potential)) < potential) {
+    minHood([nbr(potential), mid()]).get(1)
+  } else {
+    Infinity
+  }
+}
+
+def mid(){ self.getDeviceUID().getId() }
+
+def d(){ distanceTo(source) }
+
+def source(){ mid()==0; }
+
+env.put("parent", findParent(d()));
+//average(source, mid())
+

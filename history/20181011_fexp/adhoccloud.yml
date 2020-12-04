@@ -1,0 +1,130 @@
+variables:
+  random: &random
+    min: 0
+    max: 1
+    step: 1
+    default: 0
+  commRadius: &commRadius
+    min: 1.5
+    max: 1000
+    step: 2.0
+    default: 50.0
+  grain: &grain
+    min: 100.0
+    max: 300.0
+    step: 100.0
+    default: 175.0 # mean size of areas
+  batchFreq: &batchFreq
+    formula: 10
+  lowDensityThreshold: &lowDensityThreshold
+    formula: 5.0
+  highDensityThreshold: &highDensityThreshold
+    formula: 40.0
+  highLoad: &highLoad
+    formula: 60.0
+  lowLoad: &lowLoad
+    formula: 40.0
+  moveSpeed: &moveSpeed
+    formula: 10 # km/h???
+  changeEveryMaxRounds: &changeEveryMaxRounds
+    formula: 50
+  leaderFailureProbability: &failureProb
+    min: 0.005
+    step: 0.005
+    max: 0.02
+    default: 0.004
+  metricInjectedAt: &metricInjectedAt
+    formula: 450
+  metricDelta: &metricDelta
+    min: 15.00
+    step: 15.00
+    max: 50.00
+    default: 7.0
+              
+export:
+  - time
+  - molecule: available_cpu
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: usage_cpu
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: estimated_usage_cpu
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: failed
+    aggregators: [sum]
+    value-filter: FilterNaN
+  - molecule: leader
+    aggregators: [sum]
+    value-filter: FilterNaN
+
+seeds:
+  scenario: *random
+  simulation: *random
+  
+incarnation: scafi
+
+pools:
+  - pool: &program
+    - time-distribution:
+        type: ExponentialTime
+        parameters: [1]
+      type: Event
+      actions:
+        - type: RunScafiProgram
+          parameters: [it.unibo.casestudy.AdhocCloud, 20]
+  - pool: &contents
+    - molecule: source
+      concentration: 0
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+    - molecule: grain
+      concentration: *grain
+    - molecule: highDensityThreshold
+      concentration: *highDensityThreshold
+    - molecule: lowDensityThreshold
+      concentration: *lowDensityThreshold
+    - molecule: highLoad
+      concentration: *highLoad
+    - molecule: lowLoad
+      concentration: *lowLoad
+    - molecule: changeEveryMaxRounds
+      concentration: *changeEveryMaxRounds
+    - molecule: failureProb
+      concentration: *failureProb
+    - molecule: metricInjectedAt
+      concentration: *metricInjectedAt
+    - molecule: metricDelta
+      concentration: *metricDelta
+  - pool: &move
+    - time-distribution: 1.2
+        #type: ExponentialTime
+        #parameters: [1]
+      type: Event
+      actions:
+      - type: MoveToTarget
+        parameters: ["move_to", *moveSpeed]
+
+environment:
+  type: OSMEnvironment
+  parameters: [cesena.pbf, false, false]
+#  -b=12.24045,44.13541,12.24851,44.13886
+
+positions:
+  type: LatLongPosition
+
+network-model:
+  type: EuclideanDistance
+  parameters: [*commRadius]
+  
+displacements:
+  - in:
+      type: GeometricGradientRectangle
+      parameters: [400, 44.13621, 12.24045, 0.00345, 0.00706, 0.8, false, false]
+    programs: 
+      - *program
+      #- *move
+    contents: *contents

@@ -1,0 +1,67 @@
+variables:
+  random: &random
+    min: 0
+    max: 5
+    step: 1
+    default: 0
+  commRadius: &commRadius
+    min: 2.0
+    max: 3.7
+    step: 1
+    default: 3.0
+  batchFreq: &batchFreq
+    formula: 10
+  incarnation: &incarnation
+    min: 0
+    max: 1
+    step: 1
+    default: 0
+  incarnationToUse: &incarnationToUse
+    formula: 'if($incarnation==0) "Scafi" else "Protelis"'
+    language: scala
+  runProgramAction: &runProgramAction
+    formula: '"Run" + $incarnationToUse + "Program"'
+    language: scala
+              
+export:
+  - time
+  - molecule: it.unibo.exp
+    aggregators: [mean]
+    value-filter: ONLYFINITE
+  - molecule: roundExecTime
+    aggregators: [mean]
+    value-filter: ONLYFINITE
+
+seeds:
+  scenario: *random
+  simulation: *random
+
+network-model:
+  type: EuclideanDistance
+  parameters: [*commRadius]
+  
+incarnation: *incarnationToUse
+
+pools:
+  - pool: &program
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: *runProgramAction
+          parameters: [zero, 20]
+  - pool: &contents
+    - molecule: commRadius
+      concentration: *commRadius
+    - molecule: batchFreq
+      concentration: *batchFreq
+
+positions:
+  type: Continuous2DEuclidean
+  
+displacements:
+  - in:
+      type: Grid 
+      parameters: [0, 0, 30, 30, 2, 2, 0.2, 0.2]
+    programs: 
+      - *program
+    contents: *contents

@@ -1,0 +1,70 @@
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'eclipse'
+
+repositories {
+	mavenCentral()
+    flatDir { dirs 'libs' }
+}
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+apply plugin: 'idea'
+idea{
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.2'
+    compile name: 'scafi-lib-assembly-0.3.0'
+    compile name: 'alchemist-redist-7.0.2-beta'
+}
+
+/*
+task runTests {
+    println "Done."
+}
+import org.apache.tools.ant.taskdefs.condition.Os
+void makeTest(file, sampling, time, vars) {
+    def gbPerProcess = 1
+    def maxHeap = 14 * 1024
+    if (System.properties['os.name'].toLowerCase().contains('linux')) {
+        new ByteArrayOutputStream().withStream { os ->
+            def result = exec {
+                executable "bash"
+                args "-c", "cat /proc/meminfo | grep MemTotal | grep -o '[0-9]*'"
+                standardOutput = os
+            }
+            maxHeap = os.toString().toInteger() / 1024 - 2 * 1024 as int
+        }
+    }
+    def threads = Math.min(Runtime.getRuntime().availableProcessors(), maxHeap / gbPerProcess / 1024 as int)
+    println("Running on $threads threads")
+    task "run$file"(type: JavaExec){
+        classpath = sourceSets.main.runtimeClasspath
+        classpath 'src/main/protelis'
+        main = 'it.it.unibo.alchemist.Alchemist'
+        maxHeapSize = "${maxHeap}m"
+        //              jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044'
+        args("-y", "src/main/yaml/${file}.yml",
+                "-t", "$time",
+                "-b", "-var", *vars,
+                "-p", "$threads",
+                "-e", "data/${file}",
+                "-i", "$sampling")
+    }
+    runTests.dependsOn("run$file")
+}
+
+makeTest("chat_map", 1, 400, ["random"])
+makeTest("gossip_map", 5, 1200 * 4, ["random"])
+*/
+defaultTasks('build')

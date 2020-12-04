@@ -1,0 +1,18 @@
+the_plots_labels:
+  - Time
+  - Available CPU
+  - Actual CPU usage
+  - Estimated CPU usage
+  - Nfailures
+the_plots_formats:
+  - [0,2,3]
+#file_suffixes:
+#  - errors
+line_widths:
+  - [1,1,1,1,1,1]
+default_colors: &default_colors ["black","blue", "red","darkgreen"]
+the_plots_colors:
+  - *default_colors
+legend_position:
+  - "lower right"
+#force_limit_plot_y: [1000]
